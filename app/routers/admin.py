@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+import uuid
 
 from app.db.database import get_db_session
 from app.core.deps import get_current_admin_user
@@ -38,17 +39,18 @@ async def reset_dados_online(
 
         # Recriar admin padrão
         senha_hash = get_password_hash("842384")
+        admin_id = uuid.uuid4()
         await db.execute(
             text(
                 """
                 INSERT INTO usuarios (
-                    nome, usuario, senha_hash,
+                    id, nome, usuario, senha_hash,
                     is_admin, ativo,
                     nivel, salario,
                     pode_abastecer, pode_gerenciar_despesas, pode_fazer_devolucao
                 )
                 VALUES (
-                    :nome, :usuario, :senha_hash,
+                    :id, :nome, :usuario, :senha_hash,
                     true, true,
                     2, 0.0,
                     true, true, true
@@ -67,6 +69,7 @@ async def reset_dados_online(
                 """
             ),
             {
+                "id": str(admin_id),
                 "nome": "Neotrix Tecnologias",
                 "usuario": "Neotrix",
                 "senha_hash": senha_hash,
